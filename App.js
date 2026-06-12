@@ -292,7 +292,6 @@ function MessagesListScreen({ onOpen }) {
     <Animated.View style={[ls.root, { opacity: fadeAnim }]}>
       <StatusBar barStyle="light-content" backgroundColor="#000" />
       <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }}>
-        {/* Top bar */}
         <View style={ls.topBar}>
           <TouchableOpacity style={ls.editBtn} activeOpacity={0.7}>
             <Text style={ls.editText}>Править</Text>
@@ -302,11 +301,9 @@ function MessagesListScreen({ onOpen }) {
           </TouchableOpacity>
         </View>
 
-        {/* Large title */}
         <Text style={ls.largeTitle}>Сообщения</Text>
 
         <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-          {/* Contact permission banner */}
           <TouchableOpacity style={ls.contactBanner} activeOpacity={0.8}>
             <Avatar size={46} />
             <View style={{ flex: 1, marginLeft: 12 }}>
@@ -318,7 +315,6 @@ function MessagesListScreen({ onOpen }) {
             <ChevronRight size={8} color="rgba(255,255,255,0.35)" />
           </TouchableOpacity>
 
-          {/* iCloud banner */}
           <View style={ls.icloudBanner}>
             <View style={ls.icloudTop}>
               <CloudIcon />
@@ -348,7 +344,6 @@ function MessagesListScreen({ onOpen }) {
             </TouchableOpacity>
           </View>
 
-          {/* Conversation rows */}
           {CONVERSATIONS.map((convo, index) => (
             <TouchableOpacity
               key={convo.id}
@@ -356,7 +351,6 @@ function MessagesListScreen({ onOpen }) {
               activeOpacity={0.6}
               onPress={() => onOpen(convo)}
             >
-              {/* Unread dot */}
               <View style={ls.dotWrap}>
                 {convo.unread && <View style={ls.unreadDot} />}
               </View>
@@ -578,7 +572,6 @@ function SMSThreadScreen({ convo, onBack }) {
     <Animated.View style={[ts.root, { opacity: fadeAnim }]}>
       <StatusBar barStyle="light-content" backgroundColor="#000" />
       <SafeAreaView style={{ backgroundColor: "#000" }}>
-        {/* Nav bar */}
         <View style={ts.navbar}>
           <TouchableOpacity
             style={ts.backBtn}
@@ -602,14 +595,12 @@ function SMSThreadScreen({ convo, onBack }) {
           <View style={ts.navRight} />
         </View>
 
-        {/* Subtitle */}
         <View style={ts.smsLabelWrap}>
           <Text style={ts.smsLabel}>Текстовое сообщение · SMS</Text>
           <Text style={ts.smsTime}>Сегодня {convo.time}</Text>
         </View>
       </SafeAreaView>
 
-      {/* Messages */}
       <Animated.ScrollView
         style={{ flex: 1, opacity: fadeAnim }}
         contentContainerStyle={ts.msgListContent}
@@ -674,7 +665,6 @@ function SMSThreadScreen({ convo, onBack }) {
         ))}
       </Animated.ScrollView>
 
-      {/* Input bar */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
