@@ -546,9 +546,48 @@ function SMSThreadScreen({ convo, onBack }) {
   const sendMessage = () => {
     if (!text.trim()) return;
 
-    setMessages((prev) => [...prev, { id: Date.now().toString(), text }]);
+    const userText = text;
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        type: "sent",
+        text: userText,
+      },
+    ]);
 
     setText("");
+
+    if (convo.id === "4000") {
+      const ticketNumber =
+        "000091" +
+        Math.floor(Math.random() * 1000)
+          .toString()
+          .padStart(3, "0");
+
+      const now = new Date();
+
+      const dateTime =
+        now.toLocaleDateString("ro-RO") +
+        " " +
+        now.toLocaleTimeString("ro-RO", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `reply-${Date.now()}`,
+            type: "ticket",
+            ticketNumber,
+            dateTime,
+          },
+        ]);
+      }, 800);
+    }
   };
 
   useEffect(() => {
@@ -587,8 +626,10 @@ function SMSThreadScreen({ convo, onBack }) {
           <TouchableOpacity style={ts.navCenter} activeOpacity={0.7}>
             <Avatar size={44} />
             <View style={ts.navNameRow}>
-              <Text style={ts.navName}>{convo.name}</Text>
-              <ChevronRight size={7} color="rgba(255,255,255,0.7)" />
+              <View style={ts.navNameGlass}>
+                <Text style={ts.navName}>{convo.name}</Text>
+                <ChevronRight size={7} color="rgba(255,255,255,0.7)" />
+              </View>
             </View>
           </TouchableOpacity>
 
@@ -656,13 +697,42 @@ function SMSThreadScreen({ convo, onBack }) {
             </View>
           </Animated.View>
         )}
-        {messages.map((msg) => (
-          <View key={msg.id} style={ts.sentRow}>
-            <View style={ts.sentBubble}>
-              <Text style={ts.sentText}>{msg.text}</Text>
+        {messages.map((msg) => {
+          if (msg.type === "ticket") {
+            return (
+              <View key={msg.id} style={ts.receivedRow}>
+                <View style={ts.receivedBubble}>
+                  {[
+                    "IM PUA",
+                    "",
+                    `Bilet Nr MCA-${msg.ticketNumber}`,
+                    "",
+                    msg.dateTime,
+                    "",
+                    "Pret 7 MDL",
+                    "",
+                    "Bord 936",
+                  ].map((line, i) => (
+                    <Text
+                      key={i}
+                      style={line === "" ? { height: 8 } : ts.receivedLine}
+                    >
+                      {line}
+                    </Text>
+                  ))}
+                </View>
+              </View>
+            );
+          }
+
+          return (
+            <View key={msg.id} style={ts.sentRow}>
+              <View style={ts.sentBubble}>
+                <Text style={ts.sentText}>{msg.text}</Text>
+              </View>
             </View>
-          </View>
-        ))}
+          );
+        })}
       </Animated.ScrollView>
 
       <KeyboardAvoidingView
@@ -727,6 +797,22 @@ const ts = StyleSheet.create({
     fontSize: 15,
     fontWeight: "500",
     fontFamily: FONT,
+  },
+  navNameGlass: {
+    backgroundColor: "rgba(255,255,255,0.08)",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+
+    borderRadius: 12,
+
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+
+    borderTopColor: "rgba(255,255,255,0.25)",
+    borderLeftColor: "rgba(255,255,255,0.15)",
   },
   navCenter: { alignItems: "center", gap: 4, flex: 1 },
   navNameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
