@@ -288,7 +288,7 @@ const CONVERSATIONS = [
     id: "4002",
     name: "4002",
     preview1: "Plată cu succes!",
-    preview2: "7 MDL achitați către Parcul Urban de Aut…",
+    preview2: "7 MDL achitați către Parcul Urban de Autobuze (PUA)",
     time: "19:26",
     unread: false,
   },
@@ -308,6 +308,23 @@ const CONVERSATIONS = [
     preview2: null,
     time: "19:25",
     unread: true,
+  },
+  {
+    id: "Tele2",
+    name: "Tele2",
+    preview1:
+      "Tere tulemast Moldovasse! Sinu paketiga on valikus 10.00 EUR. Aktiveeri Tele2 SIM-kaart ja naudi head ühendust.",
+    preview2: null,
+    time: "05.06.2026",
+    unread: false,
+  },
+  {
+    id: "+372 5094 6133",
+    name: "+372 5094 6133",
+    preview1: "ye",
+    preview2: null,
+    time: "05.04.2026",
+    unread: false,
   },
   {
     id: "moldcell2",
@@ -824,7 +841,7 @@ const ls = StyleSheet.create({
   },
 });
 
-function SMSThreadScreen({ convo, onBack, storedMessages, onAddMessage }) {
+function SMSThreadScreen({ convo, onBack, storedMessages, onSendMessage }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(18)).current;
   const scrollRef = useRef(null);
@@ -852,38 +869,10 @@ function SMSThreadScreen({ convo, onBack, storedMessages, onAddMessage }) {
   const sendMessage = useCallback(() => {
     const userText = text.trim();
     if (!userText) return;
+
     setText("");
-
-    const now = Date.now();
-    onAddMessage(convo.id, {
-      id: now.toString(),
-      type: "sent",
-      text: userText,
-      timestamp: now,
-    });
-
-    if (convo.id === "4000" && userText === "936") {
-      const ticketNumber =
-        "000091" +
-        Math.floor(Math.random() * 1000)
-          .toString()
-          .padStart(3, "0");
-      const d = new Date();
-      const dateTime =
-        d.toLocaleDateString("ro-RO") +
-        " " +
-        d.toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" });
-      setTimeout(() => {
-        onAddMessage(convo.id, {
-          id: `reply-${Date.now()}`,
-          type: "ticket",
-          ticketNumber,
-          dateTime,
-          timestamp: Date.now(),
-        });
-      }, 1200);
-    }
-  }, [text, convo.id, onAddMessage]);
+    onSendMessage(convo.id, userText);
+  }, [text, convo.id, onSendMessage]);
 
   const is4000 = convo.id === "4000";
 
@@ -992,6 +981,14 @@ function SMSThreadScreen({ convo, onBack, storedMessages, onAddMessage }) {
                   {line}
                 </Text>
               ))}
+            </View>
+          </View>,
+        );
+      } else if (msg.type === "received") {
+        items.push(
+          <View key={msg.id} style={ts_s.receivedRow}>
+            <View style={ts_s.receivedBubble}>
+              <Text style={ts_s.receivedLine}>{msg.text}</Text>
             </View>
           </View>,
         );
@@ -1252,6 +1249,56 @@ export default function App() {
     },
     [persistMessages],
   );
+  const handleSendMessage = useCallback(
+    (convoId, text) => {
+      const now = Date.now();
+
+      addMessage(convoId, {
+        id: now.toString(),
+        type: "sent",
+        text,
+        timestamp: now,
+      });
+
+      if (convoId === "4000" && text === "936") {
+        const ticketNumber =
+          "000091" +
+          Math.floor(Math.random() * 1000)
+            .toString()
+            .padStart(3, "0");
+
+        const d = new Date();
+
+        const dateTime =
+          d.toLocaleDateString("ro-RO") +
+          " " +
+          d.toLocaleTimeString("ro-RO", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+
+        setTimeout(() => {
+          const replyTime = Date.now();
+
+          addMessage("4000", {
+            id: `ticket-${replyTime}`,
+            type: "ticket",
+            ticketNumber,
+            dateTime,
+            timestamp: replyTime,
+          });
+
+          addMessage("4002", {
+            id: `4002-${replyTime}`,
+            type: "received",
+            text: "Plată cu succes!\n7 MDL achitați către Parcul Urban de Autobuze (PUA)",
+            timestamp: replyTime,
+          });
+        }, 1200);
+      }
+    },
+    [addMessage],
+  );
 
   const handleRename = useCallback((newName) => {
     setContactName(newName);
@@ -1260,19 +1307,31 @@ export default function App() {
   }, []);
 
   const handleReset = useCallback(() => {
+    const doReset = () => {
+      setMessageStore({});
+      AsyncStorage.removeItem(STORAGE_MESSAGES_KEY).catch(() => {});
+      setEditMenuVisible(false);
+    };
+
+    if (Platform.OS === "web") {
+      if (window.confirm("Восстановить исходное состояние всех переписок?")) {
+        doReset();
+      }
+      return;
+    }
+
     Alert.alert(
       "Сбросить сообщения",
       "Восстановить исходное состояние всех переписок?",
       [
-        { text: "Отмена", style: "cancel" },
+        {
+          text: "Отмена",
+          style: "cancel",
+        },
         {
           text: "Сбросить",
           style: "destructive",
-          onPress: () => {
-            setMessageStore({});
-            AsyncStorage.removeItem(STORAGE_MESSAGES_KEY).catch(() => {});
-            setEditMenuVisible(false);
-          },
+          onPress: doReset,
         },
       ],
     );
@@ -1292,7 +1351,7 @@ export default function App() {
         <SMSThreadScreen
           convo={activeConvo}
           storedMessages={messageStore[activeConvo.id] || []}
-          onAddMessage={addMessage}
+          onSendMessage={handleSendMessage}
           onBack={() => {
             setScreen("list");
             setActiveConvo(null);
