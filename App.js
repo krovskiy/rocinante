@@ -16,6 +16,7 @@ import {
   Alert,
   Linking,
 } from "react-native";
+import { Image as RNImage } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
@@ -135,52 +136,15 @@ const Avatar = ({ size = 46 }) => (
 );
 
 const MicIcon = () => (
-  <View
+  <RNImage
+    source={require("./assets/mic.png")}
     style={{
-      width: 18,
-      height: 22,
-      alignItems: "center",
-      justifyContent: "center",
+      width: 22,
+      height: 24,
+      resizeMode: "contain",
+      tintColor: "#fff",
     }}
-  >
-    <View
-      style={{
-        width: 8,
-        height: 12,
-        borderRadius: 4,
-        borderWidth: 1.5,
-        borderColor: "rgba(255,255,255,0.4)",
-        marginBottom: 1,
-      }}
-    />
-    <View
-      style={{
-        width: 13,
-        height: 7,
-        borderTopLeftRadius: 7,
-        borderTopRightRadius: 7,
-        borderWidth: 1.5,
-        borderColor: "rgba(255,255,255,0.4)",
-        borderBottomWidth: 0,
-        marginTop: -1,
-      }}
-    />
-    <View
-      style={{
-        width: 1.5,
-        height: 3,
-        backgroundColor: "rgba(255,255,255,0.4)",
-        marginTop: 1,
-      }}
-    />
-    <View
-      style={{
-        width: 7,
-        height: 1.5,
-        backgroundColor: "rgba(255,255,255,0.4)",
-      }}
-    />
-  </View>
+  />
 );
 
 const PlusIcon = () => (
@@ -229,60 +193,6 @@ const HamburgerIcon = () => (
   </View>
 );
 
-const CloudIcon = () => (
-  <View
-    style={{
-      width: 52,
-      height: 52,
-      borderRadius: 12,
-      backgroundColor: "#fff",
-      alignItems: "center",
-      justifyContent: "center",
-    }}
-  >
-    <View
-      style={{
-        width: 30,
-        height: 18,
-        backgroundColor: "#5AC8FA",
-        borderRadius: 9,
-        marginTop: 4,
-      }}
-    />
-    <View
-      style={{
-        width: 16,
-        height: 16,
-        borderRadius: 8,
-        backgroundColor: "#5AC8FA",
-        position: "absolute",
-        top: 10,
-        left: 8,
-      }}
-    />
-    <View
-      style={{
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        backgroundColor: "#5AC8FA",
-        position: "absolute",
-        top: 8,
-        right: 8,
-      }}
-    />
-    <View
-      style={{
-        width: 30,
-        height: 10,
-        backgroundColor: "#5AC8FA",
-        position: "absolute",
-        bottom: 10,
-      }}
-    />
-  </View>
-);
-
 const CONVERSATIONS = [
   {
     id: "4002",
@@ -304,7 +214,7 @@ const CONVERSATIONS = [
     id: "moldcell",
     name: "Moldcell",
     preview1:
-      "Ai reîncărcat contul cu 10.00 lei. Soldul actual: 10.51 lei. Instalează aplicația my",
+      "Ai reîncărcat contul cu 10.00 lei. Soldul actual: 10.51 lei. Instalează aplicația my Moldcell",
     preview2: null,
     time: "19:25",
     unread: true,
@@ -623,7 +533,10 @@ function MessagesListScreen({ onOpen, contactName, onEditMenu }) {
 
           <View style={ls.icloudBanner}>
             <View style={ls.icloudTop}>
-              <CloudIcon />
+              <RNImage
+                source={require("./assets/cloud.png")}
+                style={ls.cloudImage}
+              ></RNImage>
               <View style={{ flex: 1, marginLeft: 14 }}>
                 <Text style={ls.icloudTitle}>Сообщения в iCloud</Text>
                 <Text style={ls.icloudBody}>
@@ -773,6 +686,13 @@ const ls = StyleSheet.create({
     fontWeight: "700",
     fontFamily: FONT,
     marginBottom: 4,
+  },
+  cloudImage: {
+    width: 100,
+    height: 100,
+    resizeMode: "contain",
+    backgroundColor: "white",
+    borderRadius: 10,
   },
   icloudBody: {
     color: "rgba(255,255,255,0.6)",
@@ -1028,7 +948,7 @@ function SMSThreadScreen({ convo, onBack, storedMessages, onSendMessage }) {
         </View>
         <View style={ts_s.smsLabelWrap}>
           <Text style={ts_s.smsLabel}>Текстовое сообщение · SMS</Text>
-          <Text style={ts_s.smsTime}>Сегодня {convo.time}</Text>
+          <Text style={ts_s.smsTime}>{convo.time}</Text>
         </View>
       </SafeAreaView>
 
@@ -1110,6 +1030,7 @@ const ts_s = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 10,
     paddingVertical: 4,
+
     borderRadius: 12,
     borderTopWidth: 1,
     borderLeftWidth: 1,
