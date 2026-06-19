@@ -59,7 +59,7 @@ function formatTimestamp(ts) {
 const ChevronRight = ({ size = 8, color = "rgba(255,255,255,0.45)" }) => (
   <View
     style={{
-      width: size + 4,
+      width: size + 1,
       height: size * 1.8,
       justifyContent: "center",
       alignItems: "center",
@@ -67,12 +67,17 @@ const ChevronRight = ({ size = 8, color = "rgba(255,255,255,0.45)" }) => (
   >
     <View
       style={{
-        width: size * 0.6,
-        height: size * 0.6,
-        borderTopWidth: 1.8,
-        borderRightWidth: 1.8,
+        width: size * 1.6,
+        height: size * 1.6,
+        borderTopWidth: 3.2,
+        borderRightWidth: 3.2,
         borderColor: color,
-        transform: [{ rotate: "45deg" }],
+        transform: [
+          { rotate: "45deg" },
+          { skewY: "12deg" },
+          { skewX: "12deg" },
+          { scale: 0.7 },
+        ],
       }}
     />
   </View>
@@ -106,32 +111,46 @@ const Avatar = ({ size = 46 }) => (
       width: size,
       height: size,
       borderRadius: size / 2,
-      backgroundColor: "#3a3a4a",
-      alignItems: "center",
-      justifyContent: "flex-end",
-      overflow: "hidden",
+      padding: size * 0.08,
+      background: "linear-gradient(135deg, #545166 0%, #2f2848 100%)",
+      boxSizing: "border-box",
+      marginRight: 0,
+      zIndex: 1,
     }}
   >
     <View
       style={{
-        width: size * 0.38,
-        height: size * 0.38,
-        borderRadius: size * 0.19,
-        backgroundColor: "#7a7a8a",
-        position: "absolute",
-        top: size * 0.14,
+        width: "100%",
+        height: "100%",
+        borderRadius: size / 2,
+        background: "linear-gradient(135deg, #545166 0%, #2f2848 100%)",
+        alignItems: "center",
+        justifyContent: "flex-end",
+        overflow: "hidden",
+        position: "relative",
       }}
-    />
-    <View
-      style={{
-        width: size * 0.72,
-        height: size * 0.46,
-        borderTopLeftRadius: size * 0.36,
-        borderTopRightRadius: size * 0.36,
-        backgroundColor: "#7a7a8a",
-        marginBottom: -2,
-      }}
-    />
+    >
+      <View
+        style={{
+          width: size * 0.36,
+          height: size * 0.36,
+          borderRadius: size * 0.19,
+          backgroundColor: "#ffffff",
+          position: "absolute",
+          top: size * 0.14,
+        }}
+      />
+      <View
+        style={{
+          width: size * 0.78,
+          height: size * 0.3,
+          borderTopLeftRadius: size * 0.5,
+          borderTopRightRadius: size * 0.5,
+          backgroundColor: "#ffffff",
+          marginBottom: -2,
+        }}
+      />
+    </View>
   </View>
 );
 
@@ -142,7 +161,7 @@ const MicIcon = () => (
       width: 22,
       height: 24,
       resizeMode: "contain",
-      tintColor: "#fff",
+      tintColor: "#ffffff6f",
     }}
   />
 );
@@ -237,13 +256,21 @@ const CONVERSATIONS = [
     unread: false,
   },
   {
-    id: "moldcell2",
-    name: "Moldcell",
+    id: "eealarm",
+    name: "EE-ALARM",
     preview1:
-      "Ai reîncărcat contul cu 10.00 lei. Soldul actual: 10.51 lei. Instalează aplicația my…",
+      "Estonian Defense Forces: 31.03 The air threat declared has passed, it is safe. Info: kriis.ee and 1247",
     preview2: null,
-    time: "19:25",
+    time: "31.05.2026",
     unread: true,
+  },
+  {
+    id: "discord",
+    name: "DISCORD",
+    preview1: "Your Discord verification code is: 290100",
+    preview2: null,
+    time: "29.04.2026",
+    unread: false,
   },
 ];
 
@@ -936,7 +963,7 @@ function SMSThreadScreen({ convo, onBack, storedMessages, onSendMessage }) {
             </View>
           </TouchableOpacity>
           <TouchableOpacity style={ts_s.navCenter} activeOpacity={0.7}>
-            <Avatar size={44} />
+            <Avatar size={67} />
             <View style={ts_s.navNameRow}>
               <View style={ts_s.navNameGlass}>
                 <Text style={ts_s.navName}>{convo.name}</Text>
@@ -948,7 +975,6 @@ function SMSThreadScreen({ convo, onBack, storedMessages, onSendMessage }) {
         </View>
         <View style={ts_s.smsLabelWrap}>
           <Text style={ts_s.smsLabel}>Текстовое сообщение · SMS</Text>
-          <Text style={ts_s.smsTime}>{convo.time}</Text>
         </View>
       </SafeAreaView>
 
@@ -1001,27 +1027,31 @@ const ts_s = StyleSheet.create({
     paddingHorizontal: 8,
     paddingTop: 4,
     paddingBottom: 6,
-    height: 88,
+    height: 118,
   },
   backBtn: {
+    alignSelf: "flex-start",
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 8,
     paddingVertical: 4,
+    marginTop: 7,
     gap: 5,
     minWidth: 70,
   },
   badgePill: {
-    backgroundColor: "rgba(255,255,255,0.14)",
+    backgroundColor: "rgba(255, 255, 255, 1)",
     borderRadius: 12,
     paddingHorizontal: 9,
     paddingVertical: 3,
+    marginVertical: 4,
   },
   badgeText: {
-    color: "#fff",
+    color: "rgba(0, 0, 0, 0.75)",
     fontSize: 15,
     fontWeight: "500",
     fontFamily: FONT,
+    marginTop: 1,
   },
   navNameGlass: {
     backgroundColor: "rgba(255,255,255,0.08)",
@@ -1031,14 +1061,32 @@ const ts_s = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
 
-    borderRadius: 12,
+    borderRadius: 28,
     borderTopWidth: 1,
     borderLeftWidth: 1,
     borderTopColor: "rgba(255,255,255,0.25)",
     borderLeftColor: "rgba(255,255,255,0.15)",
   },
-  navCenter: { alignItems: "center", gap: 4, flex: 1 },
-  navNameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  navCenter: {
+    alignItems: "center",
+    gap: 4,
+    flex: 1,
+    backgroundColor: "transparent",
+    height: 88,
+    marginRight: 8,
+    justifyContent: "center",
+    paddingBottom: 20,
+    paddingTop: 8,
+    paddingHorizontal: 8,
+    alignSelf: "flex-end",
+  },
+  navNameRow: {
+    transform: [{ translateY: 0 }, { scale: 1.22 }],
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: -5,
+  },
   navName: {
     color: "#fff",
     fontSize: 17,
@@ -1047,8 +1095,13 @@ const ts_s = StyleSheet.create({
     letterSpacing: -0.2,
   },
   navRight: { minWidth: 70 },
-  smsLabelWrap: { alignItems: "center", paddingBottom: 10, gap: 1 },
-  smsLabel: { color: "rgba(255,255,255,0.45)", fontSize: 12, fontFamily: FONT },
+  smsLabelWrap: { alignItems: "center", marginTop: 12 },
+  smsLabel: {
+    color: "rgba(255,255,255,0.45)",
+    fontSize: 12,
+    fontFamily: FONT,
+    fontWeight: "600",
+  },
   smsTime: { color: "rgba(255,255,255,0.45)", fontSize: 12, fontFamily: FONT },
   msgListContent: {
     paddingHorizontal: 8,
@@ -1061,7 +1114,8 @@ const ts_s = StyleSheet.create({
     color: "rgba(255,255,255,0.4)",
     fontSize: 12,
     fontFamily: FONT,
-    paddingVertical: 8,
+    fontWeight: "600",
+    paddingVertical: 0,
   },
   sentRow: { alignItems: "flex-end", marginRight: 4, marginBottom: 4 },
   sentBubble: {
