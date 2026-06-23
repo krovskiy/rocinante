@@ -1,4 +1,4 @@
-# sms ticket generator exploit
+# sms ticket system security analysis
 
 <p align="center" just>
 <img src="docs/cat.jpg" alt="drawing" width="200" />
@@ -6,6 +6,7 @@
 <br/>
 a react native application that simulates the sms-based ticket purchasing system used in moldova's public transport network (buses and trolleybuses).
 
+<br/>
 this project demonstrates a critical security vulnerability in the ticketing system: ticket numbers are predictable and can be generated offline without completing a payment transaction.
 
 ## vulnerability
@@ -22,3 +23,8 @@ as a result, an attacker can generate seemingly valid tickets without performing
 
 this project was built to showcase reverse engineering, security analysis, and mobile development skills.
 it highlights how seemingly simple systems can harbour serious vulnerabilities when they rely on weak authentication or predictable state.
+
+## ⚠️ disclaimer ⚠️
+
+this project is for educational and research purposes only.
+It does not interact with, bypass, or target any real-world ticketing service.
