@@ -248,8 +248,8 @@ const CONVERSATIONS = [
     unread: false,
   },
   {
-    id: "+372 5094 6133",
-    name: "+372 5094 6133",
+    id: "+372 5094 6148",
+    name: "+372 5094 6148",
     preview1: "ye",
     preview2: null,
     time: "05.04.2026",
@@ -1215,7 +1215,7 @@ const ts_s = StyleSheet.create({
 export default function App() {
   const [screen, setScreen] = useState("list");
   const [activeConvo, setActiveConvo] = useState(null);
-  const [contactName, setContactName] = useState("Dumitru Ciobanu");
+  const [contactName, setContactName] = useState("Anon");
   const [messageStore, setMessageStore] = useState({}); // { [convoId]: Message[] }
 
   const [editMenuVisible, setEditMenuVisible] = useState(false);
