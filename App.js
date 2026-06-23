@@ -788,12 +788,13 @@ const ls = StyleSheet.create({
   },
 });
 
-function generateTicketNumber() {
+function generateTicketNumber(bus_number) {
   // Anchor points from real observations:
   // 12 Jun 2026 19:25 → ticket 91592
   // 24 Jun 2026 19:25 → ticket 94037
   const ANCHOR_TIME = new Date("2026-06-12T19:25:00").getTime();
   const ANCHOR_TICKET = 91592;
+  const ANCHOR_TICKET_TB = 318152;
 
   // Exact rate: 2445 tickets over 12 days
   const RATE_PER_MS = (94037 - 91592) / (12 * 24 * 60 * 60 * 1000);
@@ -806,7 +807,12 @@ function generateTicketNumber() {
 
   const targetTime = Date.now() + PROCESSING_DELAY_MS;
   const elapsed = targetTime - ANCHOR_TIME;
-  const estimated = ANCHOR_TICKET + elapsed * RATE_PER_MS;
+  let estimated;
+  if (bus_number.length === 3) {
+    estimated = ANCHOR_TICKET + elapsed * RATE_PER_MS;
+  } else {
+    estimated = ANCHOR_TICKET_TB + elapsed * RATE_PER_MS;
+  }
 
   // The ticket counter is an integer, round to nearest whole number.
   // The true next ticket is deterministic on the server side.
@@ -1281,7 +1287,7 @@ export default function App() {
           return;
         }
 
-        const ticketNumber = generateTicketNumber();
+        const ticketNumber = generateTicketNumber(text);
 
         const d = new Date();
         const dateTime =
