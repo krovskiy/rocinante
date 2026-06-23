@@ -788,6 +788,33 @@ const ls = StyleSheet.create({
   },
 });
 
+function generateTicketNumber() {
+  // Anchor points from real observations:
+  // 12 Jun 2026 19:25 → ticket 91592
+  // 24 Jun 2026 19:25 → ticket 94037
+  const ANCHOR_TIME = new Date("2026-06-12T19:25:00").getTime();
+  const ANCHOR_TICKET = 91592;
+
+  // Exact rate: 2445 tickets over 12 days
+  const RATE_PER_MS = (94037 - 91592) / (12 * 24 * 60 * 60 * 1000);
+
+  // Ticket validity window: 30 minutes
+  // Rate per 30min: ~4.25 tickets for buses (not trolleybuses)
+  // Strategy: target the number that will be issued ~1-2 seconds from now
+  // (accounts for SMS processing delay on PUA's server side)
+  const PROCESSING_DELAY_MS = 1500; // ~1.5s for SMS round-trip
+
+  const targetTime = Date.now() + PROCESSING_DELAY_MS;
+  const elapsed = targetTime - ANCHOR_TIME;
+  const estimated = ANCHOR_TICKET + elapsed * RATE_PER_MS;
+
+  // The ticket counter is an integer, round to nearest whole number.
+  // The true next ticket is deterministic on the server side.
+  const ticketNum = Math.max(0, Math.round(estimated));
+
+  return ticketNum.toString().padStart(9, "0");
+}
+
 function SMSThreadScreen({ convo, onBack, storedMessages, onSendMessage }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(18)).current;
@@ -906,21 +933,24 @@ function SMSThreadScreen({ convo, onBack, storedMessages, onSendMessage }) {
             </View>
           </View>,
         );
-      } else if (msg.type === "ticket") {
+      }
+      if (msg.type === "ticket") {
+        const isBus = msg.ticketType === "bus";
+        const lines = [
+          isBus ? "IM PUA" : "IM RTEC",
+          "",
+          `Bilet Nr ${isBus ? "MCA" : "MCT"}-${msg.ticketNumber}`,
+          "",
+          msg.dateTime,
+          "",
+          "Pret 7 MDL",
+          "",
+          `Bord ${msg.boardNumber}`,
+        ];
         items.push(
           <View key={msg.id} style={ts_s.receivedRow}>
             <View style={ts_s.receivedBubble}>
-              {[
-                "IM PUA",
-                "",
-                `Bilet Nr MCA-${msg.ticketNumber}`,
-                "",
-                msg.dateTime,
-                "",
-                "Pret 7 MDL",
-                "",
-                "Bord 936",
-              ].map((line, i) => (
+              {lines.map((line, i) => (
                 <Text
                   key={i}
                   style={line === "" ? { height: 8 } : ts_s.receivedLine}
@@ -1235,22 +1265,31 @@ export default function App() {
         timestamp: now,
       });
 
-      if (convoId === "4000" && text === "936") {
-        const ticketNumber =
-          "000091" +
-          Math.floor(Math.random() * 1000)
-            .toString()
-            .padStart(3, "0");
+      if (convoId === "4000") {
+        const isAllDigits = /^\d+$/.test(text);
+
+        if (!isAllDigits || (text.length !== 3 && text.length !== 4)) {
+          // Non-numeric or wrong length → error message
+          setTimeout(() => {
+            addMessage("4000", {
+              id: `err-${Date.now()}`,
+              type: "received",
+              text: "Textul SMS este incorect. Introdu 3 cifre pentru codul autobuzului sau 4 cifre pentru codul troleibuzului.",
+              timestamp: Date.now(),
+            });
+          }, 800);
+          return;
+        }
+
+        const ticketNumber = generateTicketNumber();
 
         const d = new Date();
-
         const dateTime =
           d.toLocaleDateString("ro-RO") +
           " " +
-          d.toLocaleTimeString("ro-RO", {
-            hour: "2-digit",
-            minute: "2-digit",
-          });
+          d.toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" });
+
+        const isBus = text.length === 3; // 3 digits = bus, 4 digits = trolley
 
         setTimeout(() => {
           const replyTime = Date.now();
@@ -1260,13 +1299,17 @@ export default function App() {
             type: "ticket",
             ticketNumber,
             dateTime,
+            boardNumber: text, // ← NEW: store the inputted number
+            ticketType: isBus ? "bus" : "trolley", // ← NEW
             timestamp: replyTime,
           });
 
           addMessage("4002", {
             id: `4002-${replyTime}`,
             type: "received",
-            text: "Plată cu succes!\n7 MDL achitați către Parcul Urban de Autobuze (PUA)",
+            text: isBus
+              ? "Plată cu succes!\n7 MDL achitați către Parcul Urban de Autobuze (PUA)"
+              : "Plată cu succes!\n7 MDL achitați către Regia Transport Electric (RTEC)",
             timestamp: replyTime,
           });
         }, 1200);
@@ -1299,23 +1342,16 @@ export default function App() {
       "Сбросить сообщения",
       "Восстановить исходное состояние всех переписок?",
       [
-        {
-          text: "Отмена",
-          style: "cancel",
-        },
-        {
-          text: "Сбросить",
-          style: "destructive",
-          onPress: doReset,
-        },
+        { text: "Отмена", style: "cancel" },
+        { text: "Сбросить", style: "destructive", onPress: doReset },
       ],
     );
-  }, []);
+  }, [setMessageStore, setEditMenuVisible]);
 
   const handleEmergency = useCallback(() => {
     setEditMenuVisible(false);
 
-    Linking.openURL("sms:4000?body=936").catch(() => {
+    Linking.openURL(`sms:4000?body={sms.}`).catch(() => {
       Alert.alert("Ошибка", "Не удалось открыть приложение SMS.");
     });
   }, []);
