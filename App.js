@@ -883,8 +883,11 @@ function SMSThreadScreen({ convo, onBack, storedMessages, onSendMessage }) {
         Текстовое сообщение · SMS
       </Text>,
     );
-    const originalTs = Date.now() - 60000;
-    addSeparator(originalTs);
+    items.push(
+      <Text key="sep-original" style={ts_s.timeSep}>
+        12 июн 19:25
+      </Text>,
+    );
 
     if (is4000) {
       items.push(
@@ -1204,8 +1207,8 @@ const ts_s = StyleSheet.create({
   sentRow: { alignItems: "flex-end", marginRight: 4, marginBottom: 4 },
   sentBubble: {
     backgroundColor: "#248A3D",
-    borderRadius: 20,
-    borderBottomRightRadius: 5,
+    borderRadius: 18,
+    borderBottomRightRadius: 4,
     paddingHorizontal: 16,
     paddingVertical: 9,
     maxWidth: width * 0.72,
@@ -1214,8 +1217,8 @@ const ts_s = StyleSheet.create({
   receivedRow: { alignItems: "flex-start", marginLeft: 4 },
   receivedBubble: {
     backgroundColor: "#1c1c1e",
-    borderRadius: 20,
-    borderBottomLeftRadius: 5,
+    borderRadius: 18,
+    borderBottomLeftRadius: 4,
     paddingHorizontal: 16,
     paddingVertical: 12,
     maxWidth: width * 0.78,
