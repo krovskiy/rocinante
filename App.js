@@ -791,33 +791,39 @@ const ls = StyleSheet.create({
 function generateTicketNumber(bus_number) {
   // Anchor points from real observations:
   // 12 Jun 2026 19:25 → ticket 91592
-  // 24 Jun 2026 19:25 → ticket 94037
-  const ANCHOR_TIME = new Date("2026-06-12T19:25:00").getTime();
-  const ANCHOR_TICKET = 91592;
-  const ANCHOR_TICKET_TB = 318152;
-
-  // Exact rate: 2445 tickets over 12 days
-  const RATE_PER_MS = (94037 - 91592) / (12 * 24 * 60 * 60 * 1000);
+  // 24 Jun 2026 00:26 → ticket 94037
+  // 15 Jun 2026 12:52 → trolleybus ticket 318152
+  // 24 Jun 2026 23:20 -> trolleybus ticket 325678
 
   // Ticket validity window: 30 minutes
-  // Rate per 30min: ~4.25 tickets for buses (not trolleybuses)
+  // Rate per 30min: ~4.25 tickets for buses, ~16.6 for trolleybuses
   // Strategy: target the number that will be issued ~1-2 seconds from now
   // (accounts for SMS processing delay on PUA's server side)
   const PROCESSING_DELAY_MS = 1500; // ~1.5s for SMS round-trip
-
   const targetTime = Date.now() + PROCESSING_DELAY_MS;
-  const elapsed = targetTime - ANCHOR_TIME;
+
   let estimated;
   if (bus_number.length === 3) {
-    estimated = ANCHOR_TICKET + elapsed * RATE_PER_MS;
+    // Bus: exact rate from two observations 12 days apart
+    const ANCHOR_TIME = new Date("2026-06-12T19:25:00").getTime();
+    const ANCHOR_TICKET = 91592;
+    const RATE_PER_MS =
+      (94037 - 91592) /
+      (new Date("2026-06-24T00:26:00").getTime() - ANCHOR_TIME);
+
+    estimated = ANCHOR_TICKET + (targetTime - ANCHOR_TIME) * RATE_PER_MS;
   } else {
-    estimated = ANCHOR_TICKET_TB + elapsed * RATE_PER_MS;
+    // Trolleybus: separate rate derived from its own two anchor points
+    const ANCHOR_TIME_TB = new Date("2026-06-15T12:52:00").getTime();
+    const ANCHOR_TICKET_TB = 318152;
+    const RATE_PER_MS_TB =
+      (325678 - 318152) /
+      (new Date("2026-06-24T23:20:00").getTime() - ANCHOR_TIME_TB);
+
+    estimated =
+      ANCHOR_TICKET_TB + (targetTime - ANCHOR_TIME_TB) * RATE_PER_MS_TB;
   }
-
-  // The ticket counter is an integer, round to nearest whole number.
-  // The true next ticket is deterministic on the server side.
   const ticketNum = Math.max(0, Math.round(estimated));
-
   return ticketNum.toString().padStart(9, "0");
 }
 
@@ -871,8 +877,14 @@ function SMSThreadScreen({ convo, onBack, storedMessages, onSendMessage }) {
         );
       }
     };
+    items.push(
+      <Text key="sms-label" style={ts_s.timeSep}>
+        Текстовое сообщение · SMS
+      </Text>,
+    );
     const originalTs = Date.now() - 60000;
     addSeparator(originalTs);
+
     if (is4000) {
       items.push(
         <Animated.View
@@ -884,6 +896,7 @@ function SMSThreadScreen({ convo, onBack, storedMessages, onSendMessage }) {
           </View>
         </Animated.View>,
       );
+
       items.push(
         <Animated.View
           key="default-recv"
@@ -1009,9 +1022,6 @@ function SMSThreadScreen({ convo, onBack, storedMessages, onSendMessage }) {
           </TouchableOpacity>
           <View style={ts_s.navRight} />
         </View>
-        <View style={ts_s.smsLabelWrap}>
-          <Text style={ts_s.smsLabel}>Текстовое сообщение · SMS</Text>
-        </View>
       </SafeAreaView>
 
       <ScrollView
@@ -1040,12 +1050,40 @@ function SMSThreadScreen({ convo, onBack, storedMessages, onSendMessage }) {
                 value={text}
                 onChangeText={setText}
               />
-              <TouchableOpacity
-                style={{ padding: 4, marginLeft: 4 }}
-                activeOpacity={0.7}
-              >
-                <MicIcon />
-              </TouchableOpacity>
+              {text.trim().length > 0 ? (
+                <TouchableOpacity
+                  style={{
+                    width: 50,
+                    height: 30,
+                    borderRadius: 14,
+                    backgroundColor: "#248A3D",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginLeft: 0,
+                  }}
+                  activeOpacity={0.7}
+                  onPress={sendMessage}
+                >
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontSize: 18,
+                      fontWeight: "900",
+                      lineHeight: 20,
+                      letterSpacing: -2,
+                    }}
+                  >
+                    ⬆
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={{ padding: 4, marginLeft: 4 }}
+                  activeOpacity={0.7}
+                >
+                  <MicIcon />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </SafeAreaView>
@@ -1138,7 +1176,11 @@ const ts_s = StyleSheet.create({
     fontFamily: FONT,
     fontWeight: "600",
   },
-  smsTime: { color: "rgba(255,255,255,0.45)", fontSize: 12, fontFamily: FONT },
+  smsTime: {
+    color: "rgba(255,255,255,0.45)",
+    fontSize: 12,
+    fontFamily: FONT,
+  },
   msgListContent: {
     paddingHorizontal: 8,
     paddingTop: 4,
@@ -1152,6 +1194,7 @@ const ts_s = StyleSheet.create({
     fontFamily: FONT,
     fontWeight: "600",
     paddingVertical: 0,
+    marginVertical: 8,
   },
   sentRow: { alignItems: "flex-end", marginRight: 4, marginBottom: 4 },
   sentBubble: {
