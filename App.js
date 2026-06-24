@@ -17,6 +17,7 @@ import {
   Linking,
 } from "react-native";
 import { Image as RNImage } from "react-native";
+import Svg, { Path } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
@@ -878,7 +879,7 @@ function SMSThreadScreen({ convo, onBack, storedMessages, onSendMessage }) {
       }
     };
     items.push(
-      <Text key="sms-label" style={ts_s.timeSep}>
+      <Text key="sms-label" style={ts_s.timeSepA}>
         Текстовое сообщение · SMS
       </Text>,
     );
@@ -1064,17 +1065,12 @@ function SMSThreadScreen({ convo, onBack, storedMessages, onSendMessage }) {
                   activeOpacity={0.7}
                   onPress={sendMessage}
                 >
-                  <Text
-                    style={{
-                      color: "#fff",
-                      fontSize: 18,
-                      fontWeight: "900",
-                      lineHeight: 20,
-                      letterSpacing: -2,
-                    }}
-                  >
-                    ⬆
-                  </Text>
+                  <Svg width="14" height="15" viewBox="0 0 115.4 122.88">
+                    <Path
+                      d="M24.94,67.88A14.66,14.66,0,0,1,4.38,47L47.83,4.21a14.66,14.66,0,0,1,20.56,0L111,46.15A14.66,14.66,0,0,1,90.46,67.06l-18-17.69-.29,59.17c-.10,19.28-29.42,19-29.33-.25L43.14,50,24.94,67.88Z"
+                      fill="#fff"
+                    />
+                  </Svg>
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
@@ -1196,6 +1192,15 @@ const ts_s = StyleSheet.create({
     paddingVertical: 0,
     marginVertical: 8,
   },
+  timeSepA: {
+    textAlign: "center",
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 12,
+    fontFamily: FONT,
+    fontWeight: "600",
+    marginBottom: -8,
+  },
+
   sentRow: { alignItems: "flex-end", marginRight: 4, marginBottom: 4 },
   sentBubble: {
     backgroundColor: "#248A3D",
@@ -1407,7 +1412,7 @@ export default function App() {
 
   if (screen === "thread" && activeConvo) {
     return (
-      <>
+      <View style={{ flex: 1, backgroundColor: "#000" }}>
         <SMSThreadScreen
           convo={activeConvo}
           storedMessages={messageStore[activeConvo.id] || []}
@@ -1417,12 +1422,12 @@ export default function App() {
             setActiveConvo(null);
           }}
         />
-      </>
+      </View>
     );
   }
 
   return (
-    <>
+    <View style={{ flex: 1, backgroundColor: "#000" }}>
       <MessagesListScreen
         contactName={contactName}
         onEditMenu={() => setEditMenuVisible(true)}
@@ -1449,6 +1454,6 @@ export default function App() {
         onClose={() => setRenameVisible(false)}
         onConfirm={handleRename}
       />
-    </>
+    </View>
   );
 }
