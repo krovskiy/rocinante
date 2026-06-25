@@ -959,10 +959,17 @@ function SMSThreadScreen({ convo, onBack, storedMessages, onSendMessage }) {
       }
       if (msg.type === "ticket") {
         const isBus = msg.ticketType === "bus";
+        let org = "IM RTEC";
+        let prefix = "MCT";
+        if (msg.ticketType === "bus") {
+          org = "IM PUA";
+          prefix = "MCA";
+        }
+
         const lines = [
-          isBus ? "IM PUA" : "IM RTEC",
+          org,
           "",
-          `Bilet Nr ${isBus ? "MCA" : "MCT"}-${msg.ticketNumber}`,
+          `Bilet Nr ${prefix}-${msg.ticketNumber}`,
           "",
           msg.dateTime,
           "",
@@ -1053,6 +1060,7 @@ function SMSThreadScreen({ convo, onBack, storedMessages, onSendMessage }) {
                 onSubmitEditing={sendMessage}
                 value={text}
                 onChangeText={setText}
+                inputAccessoryViewID="suppress"
               />
               {text.trim().length > 0 ? (
                 <TouchableOpacity
@@ -1266,6 +1274,8 @@ const ts_s = StyleSheet.create({
     fontSize: 16,
     fontFamily: FONT,
     paddingVertical: 6,
+    WebkitTapHighlightColor: "transparent",
+    outline: "none",
   },
 });
 
@@ -1356,8 +1366,8 @@ export default function App() {
             type: "ticket",
             ticketNumber,
             dateTime,
-            boardNumber: text, // ← NEW: store the inputted number
-            ticketType: isBus ? "bus" : "trolley", // ← NEW
+            boardNumber: text,
+            ticketType: isBus ? "bus" : "trolley",
             timestamp: replyTime,
           });
 
